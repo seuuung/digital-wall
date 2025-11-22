@@ -49,13 +49,13 @@ function Home() {
             <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 flex gap-4 z-50">
                 <button
                     onClick={() => setIsModalOpen(true)}
-                    className="glass px-8 py-4 rounded-full shadow-2xl hover:shadow-blue-500/50 transition-all duration-300 font-bold text-lg text-white backdrop-blur-md hover:scale-110 glow"
+                    className="glass px-6 py-3 md:px-8 md:py-4 rounded-full shadow-2xl hover:shadow-blue-500/50 transition-all duration-300 font-bold text-base md:text-lg text-white backdrop-blur-md hover:scale-110 glow whitespace-nowrap"
                 >
                     ✏️ 글쓰기
                 </button>
                 <button
                     onClick={() => setIsInquiryOpen(true)}
-                    className="glass px-6 py-4 rounded-full shadow-2xl hover:shadow-purple-500/50 transition-all duration-300 font-bold text-white backdrop-blur-md hover:scale-110"
+                    className="glass px-5 py-3 md:px-6 md:py-4 rounded-full shadow-2xl hover:shadow-purple-500/50 transition-all duration-300 font-bold text-base md:text-lg text-white backdrop-blur-md hover:scale-110 whitespace-nowrap"
                 >
                     💬 문의하기
                 </button>

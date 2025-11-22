@@ -4,7 +4,7 @@ import { socket } from '../utils/socket';
 
 const Canvas = () => {
     const [posts, setPosts] = useState([]);
-    const [scale, setScale] = useState(1);
+    const [scale, setScale] = useState(0.6);
     const [position, setPosition] = useState({
         x: window.innerWidth / 2,
         y: window.innerHeight / 2
@@ -82,6 +82,7 @@ const Canvas = () => {
             setLastTouchDistance(getTouchDistance(e.touches));
         } else if (e.touches.length === 1 && e.target === containerRef.current) {
             // 터치 드래그 시작
+            // e.preventDefault(); // 여기서 preventDefault를 하면 일부 브라우저에서 클릭이 안될 수 있음, 상황에 따라 조절
             setIsDragging(true);
             setLastMousePos({ x: e.touches[0].clientX, y: e.touches[0].clientY });
         }
@@ -99,6 +100,7 @@ const Canvas = () => {
             setLastTouchDistance(currentDistance);
         } else if (e.touches.length === 1 && isDragging) {
             // 터치 드래그
+            e.preventDefault(); // 스크롤 방지
             const dx = e.touches[0].clientX - lastMousePos.x;
             const dy = e.touches[0].clientY - lastMousePos.y;
             setPosition((prev) => ({ x: prev.x + dx, y: prev.y + dy }));
@@ -140,6 +142,16 @@ const Canvas = () => {
         socket.emit('post:move', { id, position: newPosition });
     };
 
+    const handlePostFocus = (id) => {
+        const maxZIndex = Math.max(...posts.map((p) => p.position.zIndex || 1), 0);
+        const targetPost = posts.find((p) => p.id === id);
+
+        if (targetPost && (targetPost.position.zIndex || 1) <= maxZIndex) {
+            const newPosition = { ...targetPost.position, zIndex: maxZIndex + 1 };
+            handlePostMove(id, newPosition);
+        }
+    };
+
     const handlePostDelete = (id) => {
         const secret = localStorage.getItem(`post_secret_${id}`);
         if (secret) {
@@ -177,7 +189,8 @@ const Canvas = () => {
             style={{
                 background: 'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.15) 1px, transparent 0)',
                 backgroundSize: `${40 * scale}px ${40 * scale}px`,
-                backgroundPosition: `${position.x}px ${position.y}px`
+                backgroundPosition: `${position.x}px ${position.y}px`,
+                touchAction: 'none'
             }}
             onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMove}
@@ -213,6 +226,7 @@ const Canvas = () => {
                             key={post.id}
                             data={post}
                             onMove={handlePostMove}
+                            onFocus={handlePostFocus}
                             onDelete={handlePostDelete}
                             isMine={!!localStorage.getItem(`post_secret_${post.id}`)}
                         />

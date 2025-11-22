@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import Draggable from 'react-draggable';
 import { getRelativeTime } from '../utils/timeFormat';
 
-const PostIt = ({ data, onMove, onDelete, isMine }) => {
+const PostIt = ({ data, onMove, onFocus, onDelete, isMine }) => {
     const nodeRef = useRef(null);
     const { id, content, style, position, meta } = data;
     const [relativeTime, setRelativeTime] = useState('');
@@ -21,6 +21,12 @@ const PostIt = ({ data, onMove, onDelete, isMine }) => {
         return () => clearInterval(interval);
     }, [meta]);
 
+    const handleStart = () => {
+        if (onFocus) {
+            onFocus(id);
+        }
+    };
+
     const handleStop = (e, dragData) => {
         onMove(id, { x: dragData.x, y: dragData.y, zIndex: position.zIndex });
     };
@@ -30,6 +36,7 @@ const PostIt = ({ data, onMove, onDelete, isMine }) => {
             nodeRef={nodeRef}
             defaultPosition={{ x: position.x, y: position.y }}
             position={{ x: position.x, y: position.y }}
+            onStart={handleStart}
             onStop={handleStop}
             disabled={false}
         >
@@ -44,7 +51,8 @@ const PostIt = ({ data, onMove, onDelete, isMine }) => {
                     width: '200px',
                     minHeight: '200px',
                     boxShadow: '5px 5px 15px rgba(0,0,0,0.3)',
-                    borderRadius: '4px'
+                    borderRadius: '4px',
+                    touchAction: 'none'
                 }}
             >
                 {/* 상대 시간 표시 */}
