@@ -161,8 +161,8 @@ const Admin = () => {
                 <button
                     onClick={() => setActiveTab('posts')}
                     className={`px-6 py-3 rounded-lg font-bold transition-all ${activeTab === 'posts'
-                            ? 'bg-blue-500 text-white shadow-lg'
-                            : 'bg-white text-gray-700 hover:bg-gray-50'
+                        ? 'bg-blue-500 text-white shadow-lg'
+                        : 'bg-white text-gray-700 hover:bg-gray-50'
                         }`}
                 >
                     \ud3ec\uc2a4\ud2b8 ({posts.length})
@@ -170,8 +170,8 @@ const Admin = () => {
                 <button
                     onClick={() => setActiveTab('inquiries')}
                     className={`px-6 py-3 rounded-lg font-bold transition-all ${activeTab === 'inquiries'
-                            ? 'bg-blue-500 text-white shadow-lg'
-                            : 'bg-white text-gray-700 hover:bg-gray-50'
+                        ? 'bg-blue-500 text-white shadow-lg'
+                        : 'bg-white text-gray-700 hover:bg-gray-50'
                         }`}
                 >
                     \ubb38\uc758 ({inquiries.filter(i => !i.isRead).length}/{inquiries.length})
@@ -197,7 +197,22 @@ const Admin = () => {
                             {posts.map((post) => (
                                 <tr key={post.id} className="border-b hover:bg-gray-50">
                                     <td className="p-2 border text-xs font-mono">{post.id.slice(0, 8)}...</td>
-                                    <td className="p-2 border">{post.content}</td>
+                                    <td className="p-2 border">
+                                        <div
+                                            className="w-full h-24 p-2 overflow-hidden text-xs rounded shadow-sm relative"
+                                            style={{
+                                                backgroundColor: post.style?.color || '#fff740',
+                                                fontFamily: post.style?.font || 'Noto Sans KR',
+                                                transform: `rotate(${post.style?.rotation || 0}deg) scale(0.8)`
+                                            }}
+                                        >
+                                            {post.content}
+                                        </div>
+                                    </td>
+                                    <td className="p-2 border text-xs">
+                                        <div>Color: {post.style?.color}</div>
+                                        <div>Font: {post.style?.font}</div>
+                                    </td>
                                     <td className="p-2 border">{post.ipAddress}</td>
                                     <td className="p-2 border text-sm">{getAbsoluteTime(post.createdAt)}</td>
                                     <td className="p-2 border text-center">

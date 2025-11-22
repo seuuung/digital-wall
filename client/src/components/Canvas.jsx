@@ -5,7 +5,10 @@ import { socket } from '../utils/socket';
 const Canvas = () => {
     const [posts, setPosts] = useState([]);
     const [scale, setScale] = useState(1);
-    const [position, setPosition] = useState({ x: 0, y: 0 });
+    const [position, setPosition] = useState({
+        x: window.innerWidth / 2,
+        y: window.innerHeight / 2
+    });
     const [isDragging, setIsDragging] = useState(false);
     const [lastMousePos, setLastMousePos] = useState({ x: 0, y: 0 });
     const [lastTouchDistance, setLastTouchDistance] = useState(null);
@@ -173,7 +176,8 @@ const Canvas = () => {
             className="w-full h-screen overflow-hidden relative cursor-grab active:cursor-grabbing touch-none"
             style={{
                 background: 'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.15) 1px, transparent 0)',
-                backgroundSize: '40px 40px'
+                backgroundSize: `${40 * scale}px ${40 * scale}px`,
+                backgroundPosition: `${position.x}px ${position.y}px`
             }}
             onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMove}
@@ -219,7 +223,10 @@ const Canvas = () => {
             {/* UI 컨트롤 */}
             <div className="fixed bottom-6 right-6 flex flex-col gap-3 pointer-events-auto z-50">
                 <button
-                    onClick={() => { setPosition({ x: 0, y: 0 }); setScale(1); }}
+                    onClick={() => {
+                        setPosition({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
+                        setScale(1);
+                    }}
                     className="glass p-4 rounded-full shadow-2xl hover:shadow-blue-500/50 transition-all duration-300 text-2xl hover:scale-110 glow"
                     title="원점으로 복귀"
                 >
