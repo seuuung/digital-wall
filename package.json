@@ -1,0 +1,22 @@
+{
+    "name": "digital-wall",
+    "version": "1.0.0",
+    "description": "디지털 담벼락 - 익명 포스트잇 웹 애플리케이션",
+    "scripts": {
+        "install:client": "cd client && npm install",
+        "install:server": "cd server && npm install",
+        "build:client": "cd client && npm run build",
+        "build": "npm run install:client && npm run build:client && npm run install:server",
+        "start": "cd server && npm start"
+    },
+    "keywords": [
+        "digital-wall",
+        "postit",
+        "realtime"
+    ],
+    "author": "",
+    "license": "MIT",
+    "engines": {
+        "node": ">=18.0.0"
+    }
+}
