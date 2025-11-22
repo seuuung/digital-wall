@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import Draggable from 'react-draggable';
 import { getRelativeTime } from '../utils/timeFormat';
 
-const PostIt = ({ data, onMove, onFocus, onDelete, isMine }) => {
+const PostIt = ({ data, scale, onMove, onFocus, onDelete, isMine }) => {
     const nodeRef = useRef(null);
     const { id, content, style, position, meta } = data;
     const [relativeTime, setRelativeTime] = useState('');
@@ -36,6 +36,7 @@ const PostIt = ({ data, onMove, onFocus, onDelete, isMine }) => {
             nodeRef={nodeRef}
             defaultPosition={{ x: position.x, y: position.y }}
             position={{ x: position.x, y: position.y }}
+            scale={scale}
             onStart={handleStart}
             onStop={handleStop}
             disabled={false}

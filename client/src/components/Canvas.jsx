@@ -2,13 +2,9 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import PostIt from './PostIt';
 import { socket } from '../utils/socket';
 
-const Canvas = () => {
+const Canvas = ({ scale, setScale, position, setPosition }) => {
     const [posts, setPosts] = useState([]);
-    const [scale, setScale] = useState(0.6);
-    const [position, setPosition] = useState({
-        x: window.innerWidth / 2,
-        y: window.innerHeight / 2
-    });
+    // scale, position state removed (lifted to Home)
     const [isDragging, setIsDragging] = useState(false);
     const [lastMousePos, setLastMousePos] = useState({ x: 0, y: 0 });
     const [lastTouchDistance, setLastTouchDistance] = useState(null);
@@ -225,6 +221,7 @@ const Canvas = () => {
                         <PostIt
                             key={post.id}
                             data={post}
+                            scale={scale}
                             onMove={handlePostMove}
                             onFocus={handlePostFocus}
                             onDelete={handlePostDelete}

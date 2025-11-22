@@ -7,12 +7,25 @@ import { socket } from '../utils/socket';
 function Home() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isInquiryOpen, setIsInquiryOpen] = useState(false);
+    const [scale, setScale] = useState(0.6);
+    const [position, setPosition] = useState({
+        x: window.innerWidth / 2,
+        y: window.innerHeight / 2
+    });
 
     const handleCreatePost = ({ content, color, font }) => {
         const id = crypto.randomUUID();
         const secret = crypto.randomUUID();
 
         localStorage.setItem(`post_secret_${id}`, secret);
+
+        // 화면 중앙 좌표 계산 (역변환)
+        // 화면 중앙(window/2)에서 현재 캔버스 위치(position)를 빼고, 스케일로 나눔
+        const centerX = (window.innerWidth / 2 - position.x) / scale;
+        const centerY = (window.innerHeight / 2 - position.y) / scale;
+
+        // 약간의 랜덤 오프셋 추가 (-50 ~ +50)
+        const randomOffset = () => (Math.random() - 0.5) * 100;
 
         const newPost = {
             id,
@@ -23,8 +36,8 @@ function Home() {
                 rotation: (Math.random() * 10) - 5
             },
             position: {
-                x: window.innerWidth / 2 - 100,
-                y: window.innerHeight / 2 - 100,
+                x: centerX + randomOffset() - 100, // -100은 포스트잇 크기의 절반 보정
+                y: centerY + randomOffset() - 100,
                 zIndex: Date.now()
             },
             auth: {
@@ -43,7 +56,12 @@ function Home() {
 
     return (
         <div className="w-full h-screen overflow-hidden relative">
-            <Canvas />
+            <Canvas
+                scale={scale}
+                setScale={setScale}
+                position={position}
+                setPosition={setPosition}
+            />
 
             {/* 플로팅 액션 버튼들 */}
             <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 flex gap-4 z-50">
