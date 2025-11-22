@@ -121,6 +121,8 @@ app.get('*', (req, res) => {
 
 // 서버 시작
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-    console.log(`서버가 http://localhost:${PORT} 에서 실행 중입니다.`);
+const HOST = '0.0.0.0'; // Railway requires binding to 0.0.0.0
+
+server.listen(PORT, HOST, () => {
+    console.log(`서버가 http://${HOST}:${PORT} 에서 실행 중입니다.`);
 });
