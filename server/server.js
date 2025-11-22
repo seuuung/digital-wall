@@ -81,6 +81,56 @@ app.post('/api/admin/ban', (req, res) => {
     });
 });
 
+// 관리자용: 문의 목록 조회
+app.get('/api/admin/inquiries', (req, res) => {
+    const secret = req.query.secret;
+    if (secret !== (process.env.ADMIN_SECRET || 'admin-secret')) {
+        return res.status(403).json({ error: '접근 권한이 없습니다.' });
+    }
+
+    db.all('SELECT * FROM inquiries ORDER BY createdAt DESC', [], (err, rows) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ error: '조회 실패' });
+        }
+        res.json(rows);
+    });
+});
+
+// 관리자용: 문의 읽음 처리
+app.post('/api/admin/inquiries/:id/read', (req, res) => {
+    const { secret } = req.body;
+    if (secret !== (process.env.ADMIN_SECRET || 'admin-secret')) {
+        return res.status(403).json({ error: '접근 권한이 없습니다.' });
+    }
+
+    db.run('UPDATE inquiries SET isRead = 1 WHERE id = ?', [req.params.id], function (err) {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ error: '처리 실패' });
+        }
+        res.json({ success: true });
+    });
+});
+
+// 관리자용: 포스트 삭제
+app.delete('/api/admin/posts/:id', (req, res) => {
+    const { secret } = req.body;
+    if (secret !== (process.env.ADMIN_SECRET || 'admin-secret')) {
+        return res.status(403).json({ error: '접근 권한이 없습니다.' });
+    }
+
+    db.run('DELETE FROM posts WHERE id = ?', [req.params.id], function (err) {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ error: '삭제 실패' });
+        }
+        // 소켓으로 삭제 이벤트 전송
+        io.emit('post:deleted', { id: req.params.id });
+        res.json({ success: true });
+    });
+});
+
 // 문의 등록
 app.post('/api/inquiries', (req, res) => {
     const { message, contactInfo, meta } = req.body;
