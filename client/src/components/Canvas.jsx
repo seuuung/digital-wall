@@ -8,6 +8,7 @@ const Canvas = () => {
     const [position, setPosition] = useState({ x: 0, y: 0 });
     const [isDragging, setIsDragging] = useState(false);
     const [lastMousePos, setLastMousePos] = useState({ x: 0, y: 0 });
+    const [lastTouchDistance, setLastTouchDistance] = useState(null);
     const containerRef = useRef(null);
 
     useEffect(() => {
@@ -43,7 +44,7 @@ const Canvas = () => {
         };
     }, []);
 
-    // 캔버스 패닝 핸들러
+    // 마우스 패닝 핸들러
     const handleMouseDown = (e) => {
         if (e.target === containerRef.current) {
             setIsDragging(true);
@@ -64,7 +65,50 @@ const Canvas = () => {
         setIsDragging(false);
     };
 
-    // 줌 핸들러
+    // 터치 핸들러 (모바일)
+    const getTouchDistance = (touches) => {
+        const dx = touches[0].clientX - touches[1].clientX;
+        const dy = touches[0].clientY - touches[1].clientY;
+        return Math.sqrt(dx * dx + dy * dy);
+    };
+
+    const handleTouchStart = (e) => {
+        if (e.touches.length === 2) {
+            // 핀치 줌 시작
+            e.preventDefault();
+            setLastTouchDistance(getTouchDistance(e.touches));
+        } else if (e.touches.length === 1 && e.target === containerRef.current) {
+            // 터치 드래그 시작
+            setIsDragging(true);
+            setLastMousePos({ x: e.touches[0].clientX, y: e.touches[0].clientY });
+        }
+    };
+
+    const handleTouchMove = (e) => {
+        if (e.touches.length === 2 && lastTouchDistance) {
+            // 핀치 줌
+            e.preventDefault();
+            const currentDistance = getTouchDistance(e.touches);
+            const delta = currentDistance - lastTouchDistance;
+            const zoomSensitivity = 0.01;
+            const newScale = scale + delta * zoomSensitivity;
+            setScale(Math.min(Math.max(0.1, newScale), 5));
+            setLastTouchDistance(currentDistance);
+        } else if (e.touches.length === 1 && isDragging) {
+            // 터치 드래그
+            const dx = e.touches[0].clientX - lastMousePos.x;
+            const dy = e.touches[0].clientY - lastMousePos.y;
+            setPosition((prev) => ({ x: prev.x + dx, y: prev.y + dy }));
+            setLastMousePos({ x: e.touches[0].clientX, y: e.touches[0].clientY });
+        }
+    };
+
+    const handleTouchEnd = () => {
+        setIsDragging(false);
+        setLastTouchDistance(null);
+    };
+
+    // 줌 핸들러 (마우스 휠)
     const handleWheel = (e) => {
         e.preventDefault();
         const zoomSensitivity = 0.001;
@@ -135,6 +179,9 @@ const Canvas = () => {
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseUp}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
         >
             <div
                 style={{
@@ -190,4 +237,3 @@ const Canvas = () => {
 };
 
 export default Canvas;
-
