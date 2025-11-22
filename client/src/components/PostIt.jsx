@@ -1,0 +1,84 @@
+import React, { useRef, useState, useEffect } from 'react';
+import Draggable from 'react-draggable';
+import { getRelativeTime } from '../utils/timeFormat';
+
+const PostIt = ({ data, onMove, onDelete, isMine }) => {
+    const nodeRef = useRef(null);
+    const { id, content, style, position, meta } = data;
+    const [relativeTime, setRelativeTime] = useState('');
+
+    // 상대 시간 업데이트
+    useEffect(() => {
+        const updateTime = () => {
+            if (meta?.createdAt) {
+                setRelativeTime(getRelativeTime(meta.createdAt));
+            }
+        };
+
+        updateTime();
+        const interval = setInterval(updateTime, 60000); // 1분마다 업데이트
+
+        return () => clearInterval(interval);
+    }, [meta]);
+
+    const handleStop = (e, dragData) => {
+        onMove(id, { x: dragData.x, y: dragData.y, zIndex: position.zIndex });
+    };
+
+    return (
+        <Draggable
+            nodeRef={nodeRef}
+            defaultPosition={{ x: position.x, y: position.y }}
+            position={{ x: position.x, y: position.y }}
+            onStop={handleStop}
+            disabled={false}
+        >
+            <div
+                ref={nodeRef}
+                className="absolute p-4 shadow-lg cursor-move select-none transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/50 flex flex-col justify-center items-center text-center group"
+                style={{
+                    backgroundColor: style.color,
+                    fontFamily: style.font,
+                    transform: `rotate(${style.rotation}deg)`,
+                    zIndex: position.zIndex,
+                    width: '200px',
+                    minHeight: '200px',
+                    boxShadow: '5px 5px 15px rgba(0,0,0,0.3)',
+                    borderRadius: '4px'
+                }}
+            >
+                {/* 상대 시간 표시 */}
+                {relativeTime && (
+                    <div className="absolute top-2 left-2 text-xs text-gray-600 opacity-70">
+                        {relativeTime}
+                    </div>
+                )}
+
+                {/* 내용 */}
+                <div className="whitespace-pre-wrap break-words text-lg w-full pointer-events-none flex-grow flex items-center justify-center">
+                    {content}
+                </div>
+
+                {/* 삭제 버튼 */}
+                {isMine && (
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onDelete(id);
+                        }}
+                        className="absolute top-1 right-1 w-7 h-7 rounded-full bg-red-500 bg-opacity-0 hover:bg-opacity-100 text-white font-bold transition-all duration-200 flex items-center justify-center opacity-0 group-hover:opacity-100"
+                        onTouchEnd={(e) => {
+                            e.stopPropagation();
+                            onDelete(id);
+                        }}
+                    >
+                        ✕
+                    </button>
+                )}
+            </div>
+        </Draggable>
+    );
+};
+
+export default PostIt;
+
