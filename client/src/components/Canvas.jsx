@@ -77,9 +77,12 @@ const Canvas = ({ scale, setScale, position, setPosition }) => {
         if (e.touches.length === 2) {
             e.preventDefault();
             setLastTouchDistance(getTouchDistance(e.touches));
-        } else if (e.touches.length === 1 && e.target === containerRef.current) {
-            setIsDragging(true);
-            setLastMousePos({ x: e.touches[0].clientX, y: e.touches[0].clientY });
+        } else if (e.touches.length === 1) {
+            const isUIElement = e.target.closest('button, .glass, [role="button"]');
+            if (!isUIElement) {
+                setIsDragging(true);
+                setLastMousePos({ x: e.touches[0].clientX, y: e.touches[0].clientY });
+            }
         }
     };
 

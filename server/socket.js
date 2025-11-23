@@ -19,7 +19,8 @@ module.exports = (io) => {
             connectedAt: new Date().toISOString(),
             lastActivity: new Date().toISOString(),
             deviceInfo: null,
-            currentPosition: { x: 0, y: 0 }
+            currentPosition: { x: 0, y: 0 },
+            isAdmin: false // 기본값은 일반 사용자
         };
         onlineUsers.set(socket.id, userInfo);
 
@@ -164,6 +165,15 @@ module.exports = (io) => {
             });
         });
 
+        // 관리자 식별
+        socket.on('user:admin', () => {
+            const user = onlineUsers.get(socket.id);
+            if (user) {
+                user.isAdmin = true;
+                onlineUsers.set(socket.id, user);
+            }
+        });
+
         socket.on('disconnect', () => {
             console.log(`클라이언트 접속 해제: ${socket.id}`);
             // 접속자 목록에서 제거
@@ -173,8 +183,8 @@ module.exports = (io) => {
         });
     });
 
-    // 온라인 사용자 목록을 반환하는 함수 (외부에서 사용)
+    // 현재 접속자 목록 반환 (관리자 제외)
     io.getOnlineUsers = () => {
-        return Array.from(onlineUsers.values());
+        return Array.from(onlineUsers.values()).filter(user => !user.isAdmin);
     };
 };

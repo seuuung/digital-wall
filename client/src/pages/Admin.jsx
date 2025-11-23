@@ -161,6 +161,9 @@ const Admin = () => {
             setUserCount(count);
         });
 
+        // 관리자임을 서버에 알림
+        socket.emit('user:admin');
+
         return () => {
             socket.off('user:count');
         };
