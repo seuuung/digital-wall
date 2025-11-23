@@ -87,11 +87,8 @@ const PostIt = ({ data, scale, onMove, onFocus, onDelete, isMine }) => {
                                 e.stopPropagation();
                                 onDelete(id);
                             }}
-                            className="absolute top-1 right-1 w-7 h-7 rounded-full bg-red-500 bg-opacity-0 hover:bg-opacity-100 text-white font-bold transition-all duration-200 flex items-center justify-center opacity-0 group-hover:opacity-100"
-                            onTouchEnd={(e) => {
-                                e.stopPropagation();
-                                onDelete(id);
-                            }}
+                            className="absolute -top-3 -right-3 w-8 h-8 rounded-full bg-red-500 text-white font-bold shadow-md flex items-center justify-center z-10 hover:bg-red-600 transition-colors"
+                            title="삭제하기"
                         >
                             ✕
                         </button>

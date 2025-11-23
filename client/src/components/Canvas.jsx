@@ -46,7 +46,7 @@ const Canvas = ({ scale, setScale, position, setPosition }) => {
     // 마우스 패닝 핸들러
     const handleMouseDown = (e) => {
         // UI 요소가 아닌 배경이나 PostIt 영역에서만 드래그 시작
-        const isUIElement = e.target.closest('button, .glass, [role="button"]');
+        const isUIElement = e.target.closest('button, .glass, [role="button"], .post-it-container, .react-draggable');
         if (!isUIElement) {
             setIsDragging(true);
             setLastMousePos({ x: e.clientX, y: e.clientY });
