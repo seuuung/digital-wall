@@ -500,7 +500,93 @@ const Admin = () => {
             )}
 
 
-            {/* 사용자 상세 정보 모달 */}
+            {/* 포스트 상세 정보 모달 */}
+            {selectedPost && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setSelectedPost(null)}>
+                    <div className="bg-white p-8 rounded-xl shadow-2xl max-w-2xl w-full max-h-[85vh] overflow-auto" onClick={e => e.stopPropagation()}>
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className="text-2xl font-bold">포스트 상세 정보 📝</h2>
+                            <button onClick={() => setSelectedPost(null)} className="text-3xl hover:text-gray-600">&times;</button>
+                        </div>
+
+                        <div className="space-y-6">
+                            {/* 포스트 미리보기 */}
+                            <div className="flex justify-center bg-gray-100 p-8 rounded-lg">
+                                <div
+                                    className="w-64 h-64 p-6 shadow-lg flex items-center justify-center text-center text-xl break-words whitespace-pre-wrap"
+                                    style={{
+                                        backgroundColor: selectedPost.style?.color || '#fff740',
+                                        fontFamily: selectedPost.style?.font || 'Noto Sans KR',
+                                        transform: `rotate(${selectedPost.style?.rotation || 0}deg)`
+                                    }}
+                                >
+                                    {selectedPost.content}
+                                </div>
+                            </div>
+
+                            {/* 상세 정보 테이블 */}
+                            <div className="bg-gray-50 p-4 rounded-lg">
+                                <h3 className="font-bold mb-3 text-lg">메타 데이터</h3>
+                                <div className="grid grid-cols-2 gap-4 text-sm">
+                                    <div>
+                                        <span className="text-gray-500">ID</span>
+                                        <div className="font-mono">{selectedPost.id}</div>
+                                    </div>
+                                    <div>
+                                        <span className="text-gray-500">닉네임</span>
+                                        <div className="font-bold">{selectedPost.nickname || '(익명)'}</div>
+                                    </div>
+                                    <div>
+                                        <span className="text-gray-500">작성일</span>
+                                        <div>{getAbsoluteTime(selectedPost.createdAt)}</div>
+                                    </div>
+                                    <div>
+                                        <span className="text-gray-500">IP 주소</span>
+                                        <div className="font-mono">{selectedPost.ipAddress}</div>
+                                    </div>
+                                    <div>
+                                        <span className="text-gray-500">위치 (X, Y)</span>
+                                        <div className="font-mono">({selectedPost.position?.x}, {selectedPost.position?.y})</div>
+                                    </div>
+                                    <div>
+                                        <span className="text-gray-500">Z-Index</span>
+                                        <div className="font-mono">{selectedPost.position?.zIndex}</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* 디바이스 정보 */}
+                            {selectedPost.meta?.deviceInfo && (
+                                <div className="bg-blue-50 p-4 rounded-lg">
+                                    <h3 className="font-bold mb-3 text-lg">작성 기기 정보</h3>
+                                    <pre className="whitespace-pre-wrap text-xs font-mono bg-white p-4 rounded border overflow-x-auto max-h-60">
+                                        {JSON.stringify(selectedPost.meta.deviceInfo, null, 2)}
+                                    </pre>
+                                </div>
+                            )}
+
+                            <div className="flex justify-end gap-2">
+                                <button
+                                    onClick={() => {
+                                        handleDeletePost(selectedPost.id);
+                                        setSelectedPost(null);
+                                    }}
+                                    className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 font-bold"
+                                >
+                                    삭제하기
+                                </button>
+                                <button
+                                    onClick={() => setSelectedPost(null)}
+                                    className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 font-bold"
+                                >
+                                    닫기
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {
                 selectedUser && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setSelectedUser(null)}>
