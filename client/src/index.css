@@ -68,7 +68,7 @@ body {
   padding: 0;
   overflow: hidden;
   /* 애니메이션 그라디언트 배경 */
-  background: linear-gradient(-45deg, #667eea, #764ba2, #f093fb, #4facfe);
+  background: linear-gradient(-45deg, #e0c3fc, #8ec5fc, #90f7ec, #32ccbc);
   background-size: 400% 400%;
   animation: gradient-shift 15s ease infinite;
 }

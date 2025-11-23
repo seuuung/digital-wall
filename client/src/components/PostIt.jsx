@@ -4,7 +4,7 @@ import { getRelativeTime } from '../utils/timeFormat';
 
 const PostIt = ({ data, scale, onMove, onFocus, onDelete, isMine }) => {
     const nodeRef = useRef(null);
-    const { id, content, style, position, meta } = data;
+    const { id, content, nickname, style, position, meta } = data;
     const [relativeTime, setRelativeTime] = useState('');
 
     // 상대 시간 업데이트
@@ -43,51 +43,63 @@ const PostIt = ({ data, scale, onMove, onFocus, onDelete, isMine }) => {
         >
             <div
                 ref={nodeRef}
-                className="absolute p-4 shadow-lg cursor-move select-none transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/50 flex flex-col justify-center items-center text-center group"
+                className="absolute"
                 style={{
-                    backgroundColor: style.color,
-                    fontFamily: style.font,
-                    transform: `rotate(${style.rotation}deg)`,
                     zIndex: position.zIndex,
-                    width: '200px',
-                    minHeight: '200px',
-                    boxShadow: '5px 5px 15px rgba(0,0,0,0.3)',
-                    borderRadius: '4px',
                     touchAction: 'none'
                 }}
             >
-                {/* 상대 시간 표시 */}
-                {relativeTime && (
-                    <div className="absolute top-2 left-2 text-xs text-gray-600 opacity-70">
-                        {relativeTime}
+                <div
+                    className="p-4 shadow-lg cursor-move select-none transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/50 flex flex-col justify-center items-center text-center group"
+                    style={{
+                        backgroundColor: style.color,
+                        fontFamily: style.font,
+                        transform: `rotate(${style.rotation}deg)`,
+                        width: '200px',
+                        minHeight: '200px',
+                        boxShadow: '5px 5px 15px rgba(0,0,0,0.3)',
+                        borderRadius: '4px'
+                    }}
+                >
+                    {/* 상대 시간 표시 */}
+                    {relativeTime && (
+                        <div className="absolute top-2 left-2 text-xs text-gray-600 opacity-70">
+                            {relativeTime}
+                        </div>
+                    )}
+
+                    {/* 내용 */}
+                    <div className="whitespace-pre-wrap break-words text-lg w-full pointer-events-none flex-grow flex items-center justify-center">
+                        {content}
                     </div>
-                )}
 
-                {/* 내용 */}
-                <div className="whitespace-pre-wrap break-words text-lg w-full pointer-events-none flex-grow flex items-center justify-center">
-                    {content}
+                    {/* 닉네임 표시 */}
+                    {nickname && (
+                        <div className="absolute top-2 right-2 text-xs opacity-50 font-bold text-gray-700">
+                            {nickname}
+                        </div>
+                    )}
+
+                    {/* 삭제 버튼 */}
+                    {isMine && (
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onDelete(id);
+                            }}
+                            className="absolute top-1 right-1 w-7 h-7 rounded-full bg-red-500 bg-opacity-0 hover:bg-opacity-100 text-white font-bold transition-all duration-200 flex items-center justify-center opacity-0 group-hover:opacity-100"
+                            onTouchEnd={(e) => {
+                                e.stopPropagation();
+                                onDelete(id);
+                            }}
+                        >
+                            ✕
+                        </button>
+                    )}
                 </div>
-
-                {/* 삭제 버튼 */}
-                {isMine && (
-                    <button
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            onDelete(id);
-                        }}
-                        className="absolute top-1 right-1 w-7 h-7 rounded-full bg-red-500 bg-opacity-0 hover:bg-opacity-100 text-white font-bold transition-all duration-200 flex items-center justify-center opacity-0 group-hover:opacity-100"
-                        onTouchEnd={(e) => {
-                            e.stopPropagation();
-                            onDelete(id);
-                        }}
-                    >
-                        ✕
-                    </button>
-                )}
             </div>
         </Draggable>
     );
 };
 
 export default PostIt;
-

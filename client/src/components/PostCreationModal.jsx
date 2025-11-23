@@ -8,6 +8,7 @@ const FONTS = ['sans-serif', 'serif', 'monospace', 'cursive', 'fantasy'];
 
 const PostCreationModal = ({ isOpen, onClose, onCreate }) => {
     const [content, setContent] = useState('');
+    const [nickname, setNickname] = useState('');
     const [color, setColor] = useState(COLORS[0]);
     const [font, setFont] = useState(FONTS[0]);
 
@@ -16,8 +17,9 @@ const PostCreationModal = ({ isOpen, onClose, onCreate }) => {
     const handleSubmit = (e) => {
         e.preventDefault();
         if (!content.trim()) return;
-        onCreate({ content, color, font });
+        onCreate({ content, nickname, color, font });
         setContent('');
+        setNickname('');
         onClose();
     };
 
@@ -31,6 +33,16 @@ const PostCreationModal = ({ isOpen, onClose, onCreate }) => {
                     새 포스트잇 ✨
                 </h2>
                 <form onSubmit={handleSubmit}>
+                    <div className="mb-4">
+                        <input
+                            type="text"
+                            placeholder="닉네임 (선택)"
+                            value={nickname}
+                            onChange={(e) => setNickname(e.target.value)}
+                            maxLength={10}
+                            className="w-full p-3 border-2 border-white border-opacity-30 rounded-xl bg-white bg-opacity-80 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all mb-2"
+                        />
+                    </div>
                     <div className="relative mb-4">
                         <textarea
                             className="w-full h-40 p-4 border-2 border-white border-opacity-30 rounded-2xl resize-none focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all shadow-inner"

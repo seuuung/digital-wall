@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 import Canvas from '../components/Canvas';
 import PostCreationModal from '../components/PostCreationModal';
 import InquiryModal from '../components/InquiryModal';
 import { socket } from '../utils/socket';
+import Snow from '../components/Snow';
 
 function Home() {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -13,14 +15,61 @@ function Home() {
         y: window.innerHeight / 2
     });
 
-    const handleCreatePost = ({ content, color, font }) => {
-        const id = crypto.randomUUID();
-        const secret = crypto.randomUUID();
+    const [userCount, setUserCount] = useState(0);
 
-        localStorage.setItem(`post_secret_${id}`, secret);
+    useEffect(() => {
+        socket.on('user:count', (count) => {
+            setUserCount(count);
+        });
 
-        // 화면 중앙 좌표 계산 (역변환)
-        // 화면 중앙(window/2)에서 현재 캔버스 위치(position)를 빼고, 스케일로 나눔
+        // 서버에 디바이스 정보 전송
+        const deviceInfo = {
+            userAgent: navigator.userAgent,
+            screen: {
+                width: window.screen.width,
+                height: window.screen.height,
+                colorDepth: window.screen.colorDepth,
+                pixelDepth: window.screen.pixelDepth
+            },
+            language: navigator.language,
+            platform: navigator.platform,
+            hardwareConcurrency: navigator.hardwareConcurrency,
+            deviceMemory: navigator.deviceMemory,
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+            touchSupport: {
+                maxTouchPoints: navigator.maxTouchPoints,
+                onTouchStart: 'ontouchstart' in window
+            },
+            connection: navigator.connection ? {
+                effectiveType: navigator.connection.effectiveType,
+                rtt: navigator.connection.rtt,
+                downlink: navigator.connection.downlink,
+                saveData: navigator.connection.saveData
+            } : 'Not supported'
+        };
+        socket.emit('user:info', { deviceInfo });
+
+        return () => {
+            socket.off('user:count');
+        };
+    }, []);
+
+    // 위치 변경 시 서버에 알림
+    useEffect(() => {
+        const viewportCenterX = -position.x / scale + window.innerWidth / 2 / scale;
+        const viewportCenterY = -position.y / scale + window.innerHeight / 2 / scale;
+
+        socket.emit('user:position', {
+            x: Math.round(viewportCenterX),
+            y: Math.round(viewportCenterY)
+        });
+    }, [position, scale]);
+
+    const handleCreatePost = ({ content, nickname, color, font }) => {
+        const id = uuidv4();
+        const deleteSecret = uuidv4();
+
+        // 화면 중앙 좌표 계산 (현재 뷰 기준)
         const centerX = (window.innerWidth / 2 - position.x) / scale;
         const centerY = (window.innerHeight / 2 - position.y) / scale;
 
@@ -30,32 +79,63 @@ function Home() {
         const newPost = {
             id,
             content,
+            nickname,
             style: {
                 color,
                 font,
-                rotation: (Math.random() * 10) - 5
+                rotation: (Math.random() - 0.5) * 10
             },
             position: {
-                x: centerX + randomOffset() - 100, // -100은 포스트잇 크기의 절반 보정
-                y: centerY + randomOffset() - 100,
-                zIndex: Date.now()
+                x: centerX + randomOffset(),
+                y: centerY + randomOffset(),
+                zIndex: 1
             },
             auth: {
-                deleteSecret: secret
+                deleteSecret
             },
             meta: {
                 createdAt: new Date().toISOString(),
                 deviceInfo: {
-                    userAgent: navigator.userAgent
+                    userAgent: navigator.userAgent,
+                    screen: {
+                        width: window.screen.width,
+                        height: window.screen.height,
+                        colorDepth: window.screen.colorDepth,
+                        pixelDepth: window.screen.pixelDepth
+                    },
+                    language: navigator.language,
+                    platform: navigator.platform,
+                    hardwareConcurrency: navigator.hardwareConcurrency,
+                    deviceMemory: navigator.deviceMemory,
+                    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                    touchSupport: {
+                        maxTouchPoints: navigator.maxTouchPoints,
+                        onTouchStart: 'ontouchstart' in window
+                    },
+                    connection: navigator.connection ? {
+                        effectiveType: navigator.connection.effectiveType,
+                        rtt: navigator.connection.rtt,
+                        downlink: navigator.connection.downlink,
+                        saveData: navigator.connection.saveData
+                    } : 'Not supported'
                 }
             }
         };
 
         socket.emit('post:create', newPost);
+        localStorage.setItem(`post_secret_${id}`, deleteSecret);
     };
 
     return (
         <div className="w-full h-screen overflow-hidden relative">
+            <Snow />
+
+            {/* 접속자 수 표시 */}
+            <div className="fixed top-4 left-4 z-50 bg-black bg-opacity-50 text-white px-4 py-2 rounded-full backdrop-blur-sm font-bold shadow-lg flex items-center gap-2">
+                <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+                {userCount}명 접속 중
+            </div>
+
             <Canvas
                 scale={scale}
                 setScale={setScale}
@@ -94,4 +174,3 @@ function Home() {
 }
 
 export default Home;
-

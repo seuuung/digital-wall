@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import PostIt from './PostIt';
+import Minimap from './Minimap';
 import { socket } from '../utils/socket';
 
 const Canvas = ({ scale, setScale, position, setPosition }) => {
     const [posts, setPosts] = useState([]);
-    // scale, position state removed (lifted to Home)
     const [isDragging, setIsDragging] = useState(false);
     const [lastMousePos, setLastMousePos] = useState({ x: 0, y: 0 });
     const [lastTouchDistance, setLastTouchDistance] = useState(null);
@@ -45,7 +45,9 @@ const Canvas = ({ scale, setScale, position, setPosition }) => {
 
     // 마우스 패닝 핸들러
     const handleMouseDown = (e) => {
-        if (e.target === containerRef.current) {
+        // UI 요소가 아닌 배경이나 PostIt 영역에서만 드래그 시작
+        const isUIElement = e.target.closest('button, .glass, [role="button"]');
+        if (!isUIElement) {
             setIsDragging(true);
             setLastMousePos({ x: e.clientX, y: e.clientY });
         }
@@ -73,12 +75,9 @@ const Canvas = ({ scale, setScale, position, setPosition }) => {
 
     const handleTouchStart = (e) => {
         if (e.touches.length === 2) {
-            // 핀치 줌 시작
             e.preventDefault();
             setLastTouchDistance(getTouchDistance(e.touches));
         } else if (e.touches.length === 1 && e.target === containerRef.current) {
-            // 터치 드래그 시작
-            // e.preventDefault(); // 여기서 preventDefault를 하면 일부 브라우저에서 클릭이 안될 수 있음, 상황에 따라 조절
             setIsDragging(true);
             setLastMousePos({ x: e.touches[0].clientX, y: e.touches[0].clientY });
         }
@@ -86,7 +85,6 @@ const Canvas = ({ scale, setScale, position, setPosition }) => {
 
     const handleTouchMove = (e) => {
         if (e.touches.length === 2 && lastTouchDistance) {
-            // 핀치 줌
             e.preventDefault();
             const currentDistance = getTouchDistance(e.touches);
             const delta = currentDistance - lastTouchDistance;
@@ -95,8 +93,7 @@ const Canvas = ({ scale, setScale, position, setPosition }) => {
             setScale(Math.min(Math.max(0.1, newScale), 5));
             setLastTouchDistance(currentDistance);
         } else if (e.touches.length === 1 && isDragging) {
-            // 터치 드래그
-            e.preventDefault(); // 스크롤 방지
+            e.preventDefault();
             const dx = e.touches[0].clientX - lastMousePos.x;
             const dy = e.touches[0].clientY - lastMousePos.y;
             setPosition((prev) => ({ x: prev.x + dx, y: prev.y + dy }));
@@ -109,13 +106,29 @@ const Canvas = ({ scale, setScale, position, setPosition }) => {
         setLastTouchDistance(null);
     };
 
-    // 줌 핸들러 (마우스 휠)
-    const handleWheel = (e) => {
+    // 줌 핸들러 (마우스 휠) - 화면 중앙 기준, 중심 좌표 고정
+    const handleWheel = useCallback((e) => {
         e.preventDefault();
         const zoomSensitivity = 0.001;
-        const newScale = scale - e.deltaY * zoomSensitivity;
-        setScale(Math.min(Math.max(0.1, newScale), 5));
-    };
+        const newScale = Math.min(Math.max(0.1, scale - e.deltaY * zoomSensitivity), 5);
+
+        // 화면 중앙을 기준으로 줌
+        const centerX = window.innerWidth / 2;
+        const centerY = window.innerHeight / 2;
+
+        // 줌 전 중앙의 월드 좌표
+        const worldX = (centerX - position.x) / scale;
+        const worldY = (centerY - position.y) / scale;
+
+        // 새로운 스케일에서도 같은 월드 좌표가 중앙에 오도록 position 조정
+        const newPosition = {
+            x: centerX - worldX * newScale,
+            y: centerY - worldY * newScale
+        };
+
+        setScale(newScale);
+        setPosition(newPosition);
+    }, [scale, position, setScale, setPosition]);
 
     useEffect(() => {
         const container = containerRef.current;
@@ -127,7 +140,7 @@ const Canvas = ({ scale, setScale, position, setPosition }) => {
                 container.removeEventListener('wheel', handleWheel);
             }
         };
-    }, [scale]);
+    }, [handleWheel]);
 
     const handlePostMove = (id, newPosition) => {
         setPosts((prev) =>
@@ -163,7 +176,7 @@ const Canvas = ({ scale, setScale, position, setPosition }) => {
 
         const viewportWidth = window.innerWidth;
         const viewportHeight = window.innerHeight;
-        const margin = 500; // 여유 공간
+        const margin = 500;
 
         return posts.filter(post => {
             const screenX = post.position.x * scale + position.x;
@@ -230,6 +243,14 @@ const Canvas = ({ scale, setScale, position, setPosition }) => {
                     ))}
                 </div>
             </div>
+
+            {/* 미니맵 */}
+            <Minimap
+                posts={posts}
+                scale={scale}
+                position={position}
+                setPosition={setPosition}
+            />
 
             {/* UI 컨트롤 */}
             <div className="fixed bottom-6 right-6 flex flex-col gap-3 pointer-events-auto z-50">

@@ -33,9 +33,15 @@ const initDb = () => {
         createdAt TEXT,
         ipAddress TEXT,
         deviceInfo TEXT,
-        isBanned INTEGER DEFAULT 0
+        isBanned INTEGER DEFAULT 0,
+        nickname TEXT
       )
-    `);
+    `, (err) => {
+      // 기존 테이블이 있을 경우 컬럼 추가 시도 (오류 무시)
+      if (!err) {
+        db.run('ALTER TABLE posts ADD COLUMN nickname TEXT', () => { });
+      }
+    });
 
     // 문의 테이블
     db.run(`
