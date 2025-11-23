@@ -1,8 +1,20 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 
 const Minimap = ({ posts, scale, position, setPosition }) => {
-    const MINIMAP_SIZE = 200; // 미니맵 크기 증가
+    const [minimapSize, setMinimapSize] = useState(200);
     const WORLD_VIEW_SIZE = 4000; // 미니맵이 보여줄 월드 범위 (world units)
+
+    // 화면 크기에 따라 미니맵 크기 조정
+    useEffect(() => {
+        const handleResize = () => {
+            if (window.innerWidth < 640) setMinimapSize(120); // sm 미만
+            else if (window.innerWidth < 768) setMinimapSize(150); // md 미만
+            else setMinimapSize(200); // md 이상
+        };
+        handleResize();
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     // 현재 뷰포트의 중심 좌표 계산 (월드 좌표)
     const viewportCenterX = -position.x / scale + window.innerWidth / 2 / scale;
@@ -18,8 +30,9 @@ const Minimap = ({ posts, scale, position, setPosition }) => {
         height: WORLD_VIEW_SIZE
     };
 
+
     // 미니맵 스케일 (정사각형)
-    const mapScale = MINIMAP_SIZE / WORLD_VIEW_SIZE;
+    const mapScale = minimapSize / WORLD_VIEW_SIZE;
 
     // 월드 좌표 → 미니맵 좌표 변환
     const worldToMap = (x, y) => {
@@ -76,10 +89,10 @@ const Minimap = ({ posts, scale, position, setPosition }) => {
     };
 
     return (
-        <div className="fixed top-6 right-6 z-50 flex flex-col gap-2">
+        <div className="fixed top-4 sm:top-6 right-4 sm:right-6 z-50 flex flex-col gap-1 sm:gap-2">
             {/* 중심 좌표 표시 */}
-            <div className="bg-black bg-opacity-70 backdrop-blur-md text-white px-3 py-2 rounded-lg shadow-xl text-xs font-mono">
-                <div className="flex items-center gap-2">
+            <div className="bg-black bg-opacity-70 backdrop-blur-md text-white px-2 sm:px-3 py-1 sm:py-2 rounded-lg shadow-xl text-xs font-mono">
+                <div className="flex items-center gap-1 sm:gap-2">
                     <span className="text-gray-400">중심:</span>
                     <span className="font-bold text-green-400">
                         ({Math.round(viewportCenterX)}, {Math.round(viewportCenterY)})
@@ -90,7 +103,7 @@ const Minimap = ({ posts, scale, position, setPosition }) => {
             {/* 미니맵 */}
             <div
                 className="bg-white bg-opacity-90 backdrop-blur-md rounded-lg shadow-xl border-2 border-gray-300 overflow-hidden cursor-pointer hover:bg-opacity-100 transition-all relative"
-                style={{ width: MINIMAP_SIZE, height: MINIMAP_SIZE }}
+                style={{ width: minimapSize, height: minimapSize }}
                 onClick={handleClick}
                 title="클릭하여 이동"
             >

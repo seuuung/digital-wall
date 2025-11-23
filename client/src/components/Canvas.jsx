@@ -264,21 +264,21 @@ const Canvas = ({ scale, setScale, position, setPosition }) => {
             />
 
             {/* UI 컨트롤 */}
-            <div className="fixed bottom-6 right-6 flex flex-col gap-3 pointer-events-auto z-50">
+            <div className="fixed bottom-4 sm:bottom-6 right-4 sm:right-6 flex flex-col gap-2 sm:gap-3 pointer-events-auto z-50">
                 <button
                     onClick={() => {
                         setPosition({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
                         setScale(1);
                     }}
-                    className="glass p-4 rounded-full shadow-2xl hover:shadow-blue-500/50 transition-all duration-300 text-2xl hover:scale-110 glow"
+                    className="glass p-3 sm:p-4 rounded-full shadow-2xl hover:shadow-blue-500/50 transition-all duration-300 text-xl sm:text-2xl hover:scale-110 glow"
                     title="원점으로 복귀"
                 >
                     🏠
                 </button>
-                <div className="glass px-4 py-2 rounded-full shadow-2xl text-white font-bold text-sm backdrop-blur-md">
+                <div className="glass px-3 sm:px-4 py-1.5 sm:py-2 rounded-full shadow-2xl text-white font-bold text-xs sm:text-sm backdrop-blur-md">
                     {Math.round(scale * 100)}%
                 </div>
-                <div className="glass px-4 py-2 rounded-full shadow-2xl text-white font-bold text-xs backdrop-blur-md">
+                <div className="glass px-3 sm:px-4 py-1.5 sm:py-2 rounded-full shadow-2xl text-white font-bold text-xs backdrop-blur-md">
                     {visiblePosts.length} / {posts.length}
                 </div>
             </div>
