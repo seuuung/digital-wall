@@ -78,7 +78,7 @@ const Canvas = ({ scale, setScale, position, setPosition }) => {
             e.preventDefault();
             setLastTouchDistance(getTouchDistance(e.touches));
         } else if (e.touches.length === 1) {
-            const isUIElement = e.target.closest('button, .glass, [role="button"]');
+            const isUIElement = e.target.closest('button, .glass, [role="button"], .post-it-container, .react-draggable');
             if (!isUIElement) {
                 setIsDragging(true);
                 setLastMousePos({ x: e.touches[0].clientX, y: e.touches[0].clientY });
@@ -93,13 +93,21 @@ const Canvas = ({ scale, setScale, position, setPosition }) => {
             const delta = currentDistance - lastTouchDistance;
             const zoomSensitivity = 0.01;
             const newScale = scale + delta * zoomSensitivity;
-            setScale(Math.min(Math.max(0.1, newScale), 5));
+
+            requestAnimationFrame(() => {
+                setScale(Math.min(Math.max(0.1, newScale), 5));
+            });
+
             setLastTouchDistance(currentDistance);
         } else if (e.touches.length === 1 && isDragging) {
             e.preventDefault();
             const dx = e.touches[0].clientX - lastMousePos.x;
             const dy = e.touches[0].clientY - lastMousePos.y;
-            setPosition((prev) => ({ x: prev.x + dx, y: prev.y + dy }));
+
+            requestAnimationFrame(() => {
+                setPosition((prev) => ({ x: prev.x + dx, y: prev.y + dy }));
+            });
+
             setLastMousePos({ x: e.touches[0].clientX, y: e.touches[0].clientY });
         }
     };

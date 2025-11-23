@@ -43,7 +43,7 @@ const PostIt = ({ data, scale, onMove, onFocus, onDelete, isMine }) => {
         >
             <div
                 ref={nodeRef}
-                className="absolute"
+                className="absolute post-it-container"
                 style={{
                     zIndex: position.zIndex,
                     touchAction: 'none'

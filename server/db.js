@@ -4,14 +4,25 @@
  */
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
+const fs = require('fs');
 
-// DB 파일 경로 설정
-const dbPath = path.resolve(__dirname, 'digital_wall.db');
+// DB 파일 경로 설정 (Railway Volume 지원)
+let dbPath;
+if (process.env.RAILWAY_VOLUME_MOUNT_PATH) {
+  dbPath = path.join(process.env.RAILWAY_VOLUME_MOUNT_PATH, 'database.sqlite');
+} else if (fs.existsSync('/server')) {
+  // Railway Volume Mount Path가 /server인 경우 자동 감지
+  dbPath = path.join('/server', 'database.sqlite');
+} else {
+  // 로컬 개발 환경
+  dbPath = path.resolve(__dirname, 'digital_wall.db');
+}
+
 const db = new sqlite3.Database(dbPath, (err) => {
   if (err) {
     console.error('데이터베이스 연결 실패:', err.message);
   } else {
-    console.log('데이터베이스에 연결되었습니다.');
+    console.log(`데이터베이스에 연결되었습니다: ${dbPath}`);
   }
 });
 
